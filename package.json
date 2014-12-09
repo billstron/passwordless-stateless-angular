@@ -14,5 +14,10 @@
   "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/billstron/passwordless-stateless-angular/issues"
+  },
+  "dependencies": {
+    "express": "~4.10.4",
+    "passwordless": "~1.0.8",
+    "passwordless-memorystore": "0.0.1"
   }
 }
