@@ -1,14 +1,14 @@
 (function(){
 	
+	var apiConfig = {
+		refresh: 60, 
+		host: "http://localhost:3000"
+	};
+	
 	var mod = angular.module("psa-app", ["ngRoute"]);
 	
 	mod.service("AuthIntercepter", ["$rootScope", "$q", "$window", "$interval", 
 		function($rootScope, $q, $window, $interval) {
-			
-			var apiConfig = {
-				refresh: 60, 
-				host: "http://localhost:3000"
-			};
 
 			var checkInterval = apiConfig.refresh * 1000;
 
@@ -54,6 +54,16 @@
 		function($http, $window, $rootScope){
 			var self = this;
 			
+			this.passwordless = function(email){
+				return $http.post(apiConfig.host + "/api/passwordless", {user: email})
+					.success(function (data, status, headers, config) {
+						return "okay";
+					})
+					.error(function (data, status, headers, config) {
+						return "bad";
+					});
+			};
+			
 			this.login = function(uid, token){
 				return $http.post(apiConfig.host + "/api/login", {uid: uid, token: token})
 					.success(function (data, status, headers, config) {
@@ -98,6 +108,19 @@
 				.otherwise({
 					redirectTo: "/"
 				});
+		}
+	]);
+	
+	mod.controller("Dash", ["Logon", "AuthIntercepter",
+		function(logon, auth){
+			var self = this;
+			
+			this.login = function(email){
+				logon.passwordless(email)
+					.then(function(data){
+						self.status = "submitting email: " + data;
+					});
+			}
 		}
 	]);
 	

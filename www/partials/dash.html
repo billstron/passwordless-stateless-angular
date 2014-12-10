@@ -1,0 +1,15 @@
+<div ng-controller="Dash as dash">
+	<div>
+		<label>
+			Status
+			<input type="text" ng-model="dash.status" disabled/>
+		</label>
+	</div>
+	<div>
+		<label>
+			Email
+			<input type="email" ng-model="dash.email" />
+		</label>
+		<button ng-click="dash.login(dash.email)">Submit</button>
+	</div>
+</div>
