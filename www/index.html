@@ -14,6 +14,12 @@
 <body ng-app="psa-app">
 	
 	<div ng-controller="Main as main">
+		<label>
+			Authorized
+			<input type="checkbox" ng-model="main.authorized" disabled/>
+		</label>
+		<button ng-click="main.logout()">Logout</button>
+			
 		<div ng-view></div>
 	</div>
 	

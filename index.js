@@ -3,7 +3,6 @@ var path = require("path");
 var bodyParser = require('body-parser');
 var passwordless = require('passwordless');
 var MemStore = require('passwordless-memorystore');
-var expressJwt = require('express-jwt');
 
 var app = express();
 
@@ -24,12 +23,11 @@ app.use(bodyParser.urlencoded());
 app.use(express.static(path.join(__dirname, "www")));
 app.use('/api', require("./routes/api"));
 
-/// catch 404 and forward to error handler
 app.use(function(req, res, next) {
     res.status(404).end();
 });
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', 3000);
 
 var server = app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + server.address().port);

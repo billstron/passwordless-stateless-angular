@@ -28,8 +28,31 @@
 		}
 	]);
 	
-	mod.service("Api", ["$http", "$window", "$interval", 
+	mod.service("Api", ["$http", "$window",
 		function($http, $window, $interval){
+			
+			this.getOpen = function(){
+				return $http.get(apiConfig.host + "/api/open");
+			};
+			
+			this.getRestricted = function(){
+				return $http.get(apiConfig.host + "/api/restricted");
+			};
+			
+		}
+	]);
+		
+	mod.service("Logon", ["$http", "$window", "$interval", "$rootScope",
+		function($http, $window, $interval, $rootScope){
+			var self = this;
+			
+			this.authorized = false;
+			
+			function setAuth(auth){
+				self.authorized = auth;
+				$rootScope.$broadcast("logon.authorized", self.authorized);
+			}
+			
 			var checkInterval = apiConfig.refresh * 1000;
 
 			function checkStatus(){
@@ -38,11 +61,12 @@
 						.success(function(data){
 							console.log("success with refresh:", data.token);
 							$window.sessionStorage.token = data.token;
+							setAuth(true);
 						})
 						.error(function(err){
 							console.log("error on refresh:", err);
 							delete $window.sessionStorage.token;
-							
+							setAuth(false);
 						});
 				}else{
 					
@@ -51,25 +75,6 @@
 
 			$interval(checkStatus, checkInterval);
 			checkStatus();
-			
-			this.open = {
-				get : function(){
-					return $http.get(apiConfig.host + "/api/open");
-				},
-			};
-			
-			this.restricted = {
-				get : function(){
-					return $http.get(apiConfig.host + "/api/restricted");
-				},
-			}
-			
-		}
-	]);
-		
-	mod.service("Logon", ["$http", "$window", "$rootScope",
-		function($http, $window, $rootScope){
-			var self = this;
 			
 			this.passwordless = function(email){
 				return $http.post(apiConfig.host + "/api/passwordless", {user: email})
@@ -86,11 +91,13 @@
 					.success(function (data, status, headers, config) {
 			
 						$window.sessionStorage.token = data.token;
+						setAuth(true);
 						return "welcome";
 					})
 					.error(function (data, status, headers, config) {
 						// Erase the token if the user fails to log in
 						delete $window.sessionStorage.token;
+						setAuth(false);
 
 						// Handle login errors here
 						return 'Error: Invalid user or password';
@@ -101,6 +108,7 @@
 				return $http.post(apiConfig.host + "/api/logout")
 					.success(function(data){
 						delete $window.sessionStorage.token;
+						setAuth(false);
 						return true;
 					})
 					.error(function(data){
@@ -128,9 +136,21 @@
 		}
 	]);
 	
-	mod.controller("Main", ["Api", "Logon",
-		function(api, logon){
+	mod.controller("Main", ["$rootScope", "Api", "Logon",
+		function($rootScope, api, logon){
+			var self = this;
 			
+			this.authorized = logon.authorized;
+			$rootScope.$on("logon.authorized", function(event, value){
+				self.authorized = value;
+			});
+			
+			this.logout = function(){
+				logon.logout()
+					.then(function(okay){
+						console.log("logged out:", okay);
+					});
+			};
 		}
 	]);
 	
@@ -146,7 +166,7 @@
 			};
 			
 			this.getOpen = function(){
-				api.open.get()
+				api.getOpen()
 					.success(function(data){
 						self.openValue = data;
 					})
@@ -156,7 +176,7 @@
 			};
 			
 			this.getRestricted = function(){
-				api.restricted.get()
+				api.getRestricted()
 					.success(function(data){
 						self.restrictedValue = data;
 					})

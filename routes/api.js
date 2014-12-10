@@ -8,8 +8,8 @@ var secret = "some-long-secret";
 var User = {
 	tokens: [],
 	find: function(obj, callback){
-		if(obj.email == "billstron@gmail.com" || obj.id == 213){
-			callback(null, {email: "billstron@gmail.com", id: 213, address: "1803 Dartmouth Dr"});
+		if(obj.email == "foo@bar.com" || obj.id == 213){
+			callback(null, {email: "foo@bar.com", id: 213, address: "1803 Calculingua Dr"});
 		}else{
 			callback(null);
 		}
@@ -24,6 +24,18 @@ var User = {
 	},
 	removeToken: function(token, callback){
 		delete User.tokens[token];
+		callback(null);
+	},
+	removeAllUserTokens: function(email, callback){
+		try{
+			for(var key in User.tokens){
+				if(User.tokens[key].email == email){
+					delete User.tokens[key];
+				}
+			}
+		}catch(ex){
+			return callback(ex);
+		}
 		callback(null);
 	}
 };
@@ -83,6 +95,26 @@ app.post('/passwordless',
 		res.send("okay");
 	}
 );
+
+app.post("/logout", function(req, res){
+		
+	var token = req.header("Authorization");
+	token = token.split(" ")[1];
+	
+	verifyToken(token, function(err, decoded) {
+		if(err){
+			return res.status(401, err);
+		}
+		
+		User.removeAllUserTokens(decoded.email, function(err){
+			if(err){
+				return res.status(500, err);
+			}
+			return res.status(200).send("all tokens removed");
+		});
+	});
+});
+
 
 app.post('/refresh-token', function(req, res){
 
