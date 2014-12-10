@@ -9,7 +9,27 @@
 	
 	mod.service("AuthIntercepter", ["$rootScope", "$q", "$window", "$interval", 
 		function($rootScope, $q, $window, $interval) {
-
+		
+			this.request = function (config) {
+				config.url = config.url;
+				config.headers = config.headers || {};
+				if ($window.sessionStorage.token) {
+					config.headers.Authorization = 'Bearer ' + $window.sessionStorage.token;
+				}
+				return config;
+			};
+		
+			this.response = function (response) {
+				if (response.status === 401) {
+					// handle the case where the user is not authenticated
+				}
+				return response || $q.when(response);
+			};
+		}
+	]);
+	
+	mod.service("Api", ["$http", "$window", "$interval", 
+		function($http, $window, $interval){
 			var checkInterval = apiConfig.refresh * 1000;
 
 			function checkStatus(){
@@ -31,22 +51,19 @@
 
 			$interval(checkStatus, checkInterval);
 			checkStatus();
-		
-			this.request = function (config) {
-				config.url = config.url;
-				config.headers = config.headers || {};
-				if ($window.sessionStorage.token) {
-					config.headers.Authorization = 'Bearer ' + $window.sessionStorage.token;
-				}
-				return config;
+			
+			this.open = {
+				get : function(){
+					return $http.get(apiConfig.host + "/api/open");
+				},
 			};
-		
-			this.response = function (response) {
-				if (response.status === 401) {
-					// handle the case where the user is not authenticated
-				}
-				return response || $q.when(response);
-			};
+			
+			this.restricted = {
+				get : function(){
+					return $http.get(apiConfig.host + "/api/restricted");
+				},
+			}
+			
 		}
 	]);
 		
@@ -69,14 +86,14 @@
 					.success(function (data, status, headers, config) {
 			
 						$window.sessionStorage.token = data.token;
-						self.message = 'Welcome';
+						return "welcome";
 					})
 					.error(function (data, status, headers, config) {
 						// Erase the token if the user fails to log in
 						delete $window.sessionStorage.token;
 
 						// Handle login errors here
-						self.message = 'Error: Invalid user or password';
+						return 'Error: Invalid user or password';
 					});
 			};
 
@@ -102,8 +119,8 @@
 				.when('/', {
 					templateUrl: '/partials/dash.html',
 				})
-				.when("/logon", {
-					templateUrl: "/partials/logon.html"
+				.when("/authenticate", {
+					templateUrl: "/partials/authenticate.html"
 				})
 				.otherwise({
 					redirectTo: "/"
@@ -111,17 +128,69 @@
 		}
 	]);
 	
-	mod.controller("Dash", ["Logon", "AuthIntercepter",
-		function(logon, auth){
+	mod.controller("Main", ["Api", "Logon",
+		function(api, logon){
+			
+		}
+	]);
+	
+	mod.controller("Dash", ["Logon", "AuthIntercepter", "Api",
+		function(logon, auth, api){
 			var self = this;
 			
 			this.login = function(email){
 				logon.passwordless(email)
-					.then(function(data){
-						self.status = "submitting email: " + data;
+					.then(function(res){
+						self.status = "submitting email: " + res.data;
+					});
+			};
+			
+			this.getOpen = function(){
+				api.open.get()
+					.success(function(data){
+						self.openValue = data;
+					})
+					.error(function(data){
+						self.openValue = data;
+					});
+			};
+			
+			this.getRestricted = function(){
+				api.restricted.get()
+					.success(function(data){
+						self.restrictedValue = data;
+					})
+					.error(function(data){
+						self.restrictedValue = data;
 					});
 			}
 		}
 	]);
+	
+	mod.controller("Auth", ["$location", "$window", "Logon", "AuthIntercepter",
+		function($location, $window, logon, auth){
+			var self = this;
+			
+			this.login = function(uid, token){
+				logon.login(uid, token)
+					.then(function(message){
+						console.log(message);
+						$window.location.href = "/";
+					})
+					.catch(function(message){
+						
+					});
+			};
+			
+			var params = $location.search();
+			if(params.uid && params.token){
+				self.uid = params.uid;
+				self.token = params.token;
+				self.login(self.uid, self.token);
+			}
+		}
+	]);
+	
+	
 	
 })();

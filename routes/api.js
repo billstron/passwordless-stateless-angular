@@ -46,6 +46,10 @@ function createToken(obj, callback){
 	});
 }
 
+function verifyToken(token, callback){
+	jwt.verify(token, secret, callback);
+}
+
 
 var app = express();
 
@@ -80,30 +84,11 @@ app.post('/passwordless',
 	}
 );
 
-// app.post("/logout", function(req, res){
-//
-// 	var token = req.header("Authorization");
-// 	token = token.split(" ")[1];
-//
-// 	jwt.verify(token, secret, function(err, decoded) {
-// 		if(err){
-// 			return res.status(401, err);
-// 		}
-//
-// 		accountModel.removeAllUserTokens(decoded.email, function(err){
-// 			if(err){
-// 				return res.status(500, err);
-// 			}
-// 			return res.status(200).send("all tokens removed");
-// 		});
-// 	});
-// });
-
 app.post('/refresh-token', function(req, res){
 
 	var token = req.body.token;
 
-	jwt.verify(token, secret, function(err, decoded) {
+	verifyToken(token, function(err, decoded){
 		if (err) {
 			if(err.name == "TokenExpiredError"){
 				
@@ -151,6 +136,14 @@ app.post('/refresh-token', function(req, res){
 			});
 		}
 	});
+});
+
+app.get("/open", function(req, res){
+	res.send("no problem here");
+});
+
+app.get("/restricted", expressJwt({secret: secret}), function(req, res){
+	res.send("YOU are okay");
 });
 	
 module.exports = app;

@@ -3,6 +3,7 @@ var path = require("path");
 var bodyParser = require('body-parser');
 var passwordless = require('passwordless');
 var MemStore = require('passwordless-memorystore');
+var expressJwt = require('express-jwt');
 
 var app = express();
 

@@ -1,0 +1,12 @@
+<div ng-controller="Auth as auth">
+	<label>
+		UID
+		<input type="text" ng-model="auth.uid" />
+	</label>
+	<label>
+		Token
+		<input type="text" ng-model="auth.token" />
+	</label>
+	<button ng-click="auth.login(auth.uid, auth.token)">Submit</button>
+	
+</div>
