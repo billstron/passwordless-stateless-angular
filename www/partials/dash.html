@@ -2,9 +2,9 @@
 	<div>
 		<label>
 			Email
-			<input type="email" ng-model="dash.email" />
+			<input type="email" ng-model="dash.email" ng-disabled="main.authorized"/>
 		</label>
-		<button ng-click="dash.login(dash.email)">Submit</button>
+		<button ng-click="dash.login(dash.email)" ng-disabled="main.authorized">Submit</button>
 	</div>
 	<div>
 		<label>
@@ -12,18 +12,22 @@
 			<input type="text" ng-model="dash.status" disabled/>
 		</label>
 	</div>
-	<div>
-		<div>
+	
+	<fieldset>
+		<legend>API Resources</legend>
+
+		<span>
 			Open Resource
-		</div>
+		</span><br>
 		<input type="text" ng-model="dash.openValue" disabled/>
 		<button ng-click="dash.getOpen()">Submit</button>
-	</div>
-	<div>
-		<div>
+		<br>
+
+		<span>
 			Restricted Resource
-		</div>
+		</span><br>
 		<input type="text" ng-model="dash.restrictedValue" disabled/>
 		<button ng-click="dash.getRestricted()">Submit</button>
-	</div>
+		
+	</fieldset>
 </div>

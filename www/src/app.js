@@ -161,7 +161,10 @@
 			this.login = function(email){
 				logon.passwordless(email)
 					.then(function(res){
-						self.status = "submitting email: " + res.data;
+						self.status = "success: " + res.data;
+					})
+					.catch(function(res){
+						self.status = "failed: " + res.data;
 					});
 			};
 			
