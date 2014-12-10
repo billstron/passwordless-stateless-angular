@@ -6,11 +6,10 @@ var MemStore = require('passwordless-memorystore');
 
 var app = express();
 
-var host = 'http://localhost:3000/api/auth';
+var host = 'http://localhost:3000/#/authenticate';
 
 // Setup of Passwordless
 passwordless.init(new MemStore());
-
 passwordless.addDelivery(function(tokenToSend, uidToSend, recipient, callback) {
 	console.log("\n\nYou can now access your account here: " 
 		+ host + "?token=" + tokenToSend + "&uid=" + encodeURIComponent(uidToSend));
