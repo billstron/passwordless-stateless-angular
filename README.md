@@ -8,6 +8,7 @@ login with a stateless API server using JWT.
 Dependencies: `node.js`, `bower`.
 ```
 git clone https://github.com/billstron/passwordless-stateless-angular.git
+cd ./passwordless-stateless-angular
 npm install
 bower install
 ```
