@@ -18,6 +18,7 @@
   "dependencies": {
     "express": "~4.10.4",
     "passwordless": "~1.0.8",
-    "passwordless-memorystore": "0.0.1"
+    "passwordless-memorystore": "0.0.1",
+    "body-parser": "~1.10.0"
   }
 }
